@@ -1,0 +1,198 @@
+{
+  "name": "Telegram chat Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const tips = [\n  \"Always verify AI output – hallucination is real.\",\n  \"Master Python and basic ML to stand out.\",\n  \"Stay active on Hugging Face – it’s a hub for top AI models.\",\n  \"Contribute to open-source AI projects.\",\n  \"Learn prompt engineering – it’s one of the most in-demand AI skills right now.\"\n];\nconst dailyTips = [\n  \"Try tools like Claude or Gemini alongside ChatGPT to compare answers.\",\n  \"Use ChatGPT custom instructions for faster results.\",\n  \"Experiment with vector databases like Pinecone or Weaviate.\",\n  \"Explore LangChain for AI apps.\"\n];\n\nreturn [{\n  json: {\n    ai_survival_tip: tips[Math.floor(Math.random() * tips.length)],\n    ai_daily_tip: dailyTips[Math.floor(Math.random() * dailyTips.length)]\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "871f2291-5601-494a-8c5e-d24ac8f13eaa",
+      "name": "AI Tips Generator"
+    },
+    {
+      "parameters": {
+        "jsCode": "function escapeMarkdown(text) {\n  return text\n    .replace(/_/g, '\\\\_')\n    .replace(/\\*/g, '\\\\*')\n    .replace(/\\[/g, '\\\\[')\n    .replace(/\\]/g, '\\\\]')\n    .replace(/\\(/g, '\\\\(')\n    .replace(/\\)/g, '\\\\)')\n    .replace(/~/g, '\\\\~')\n    .replace(/`/g, '\\\\`')\n    .replace(/>/g, '\\\\>')\n    .replace(/#/g, '\\\\#')\n    .replace(/\\+/g, '\\\\+')\n    .replace(/-/g, '\\\\-')\n    .replace(/=/g, '\\\\=')\n    .replace(/\\|/g, '\\\\|')\n    .replace(/{/g, '\\\\{')\n    .replace(/}/g, '\\\\}')\n    .replace(/\\./g, '\\\\.')\n    .replace(/!/g, '\\\\!');\n}\n\nconst items = $input.all();\n\nreturn items.map(item => {\n  const title = escapeMarkdown(item.json.title || 'No Title');\n  const link = item.json.link || '';\n  const pubDate = escapeMarkdown(item.json.pubDate || '');\n  const summary = escapeMarkdown(\n    item.json['content:encodedSnippet'] || \n    item.json.contentSnippet || \n    'No summary available.'\n  );\n\n  return {\n    json: {\n      formattedMessage: `📰 *${title}*\\n🗓️ ${pubDate}\\n\\n${summary}\\n\\n[Read more](${link})`\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "c56feaa2-754c-43db-b337-da7186f2faa1",
+      "name": "Format Message"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 8
+            }
+          ]
+        }
+      },
+      "name": "Daily Cron Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -16
+      ],
+      "id": "81b64861-e3a2-4dcd-802f-58edef091a6d"
+    },
+    {
+      "parameters": {
+        "chatId": "5694645069",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -16
+      ],
+      "id": "8fb2d126-effd-4dd7-b8b8-0c22b155af71",
+      "webhookId": "b027b4a0-7d9e-48d5-978f-03c32890e03e"
+    },
+    {
+      "parameters": {
+        "url": "https://remoteok.com/remote-ai-jobs.rss",
+        "options": {}
+      },
+      "name": "Fetch AI Jobs",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        176
+      ],
+      "id": "c3949906-91ee-49a2-b7d3-544dc8badebc"
+    },
+    {
+      "parameters": {
+        "url": "https://www.artificialintelligence-news.com/feed/",
+        "options": {}
+      },
+      "name": "Fetch AI News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -208
+      ],
+      "id": "1ad8b27d-370c-4bad-8c68-c2f5d0404454"
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $json[\"formattedMessage\"]; // replace with your field name\nconst maxLength = 4000; // keep a safe buffer under 4096\nlet parts = [];\n\nfor (let i = 0; i < message.length; i += maxLength) {\n  parts.push(message.slice(i, i + maxLength));\n}\n\nreturn parts.map(p => ({ json: { text: p } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        -16
+      ],
+      "id": "8fd17a66-cd4f-4d21-8595-3411dba630c7",
+      "name": "Split"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Tips Generator": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Tips Generator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch AI Jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch AI News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch AI Jobs": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch AI News": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9e6e75ee-18af-4644-928a-4b0c8664024d",
+  "meta": {
+    "instanceId": "abb9ca62b0873ba7925fb8e3966d48db27bc00ef1d73fd74ccad1a4dbe5461af"
+  },
+  "id": "IQFcS6TYcExr0iMw",
+  "tags": []
+}
