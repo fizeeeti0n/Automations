@@ -1,0 +1,1292 @@
+{
+  "name": "Social on Autopilot Enhanced copy",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk",
+          "mode": "list",
+          "cachedResultName": "Socials On Autopilot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1211694447,
+          "mode": "list",
+          "cachedResultName": "Copy of Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk/edit#gid=1211694447"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "STATUS",
+              "lookupValue": "Pending"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1792,
+        -2096
+      ],
+      "id": "b82dbfdd-79a9-4d43-9053-58eca6b2f882",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JTEMhO9UR0gfgRXM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2016,
+        -2192
+      ],
+      "id": "82f420b7-d919-439a-91d1-78e7db501a0f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "5694645069",
+        "text": "Nothing to post",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1344,
+        -2000
+      ],
+      "id": "d31e41fe-0311-423f-839b-987fc91a09c4",
+      "name": "Send a text message",
+      "webhookId": "ce4b9b9b-1a8e-4b87-a75c-82423a4d426c",
+      "credentials": {
+        "telegramApi": {
+          "id": "Kj62BsvUIW75Av82",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.id }}",
+        "edge": "comments",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $json.comment_text }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -2096
+      ],
+      "id": "f0e1eeab-9183-4480-82a5-b3938785a59f",
+      "name": "Image Comment Posting",
+      "alwaysOutputData": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1JqKQiKP3QmSL4LB",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "240d9d6f-5179-4966-934e-419e2230f802",
+              "leftValue": "={{ $json.URL }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1568,
+        -2096
+      ],
+      "id": "7167cd6b-9c2c-4c1d-a259-12b01c41dd95",
+      "name": "Post Searching"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.URL.split('/')[5] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -896,
+        -2480
+      ],
+      "id": "2f4370d5-f2eb-4fbc-8f7e-4a9a3ae862c8",
+      "name": "Download",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "2pfvcp19BFuCywdZ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d97d9aea-66e1-4187-b7db-897738a17268",
+              "name": "post_data",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e441aefd-1c8c-4e2b-adea-851ff27232f4",
+              "name": "comment_text",
+              "value": "={{ $('Download').item.json.First_Comment }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -2288
+      ],
+      "id": "fec98bc7-b868-488a-8e9f-003e020eab02",
+      "name": "Video Adding Comment"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d97d9aea-66e1-4187-b7db-897738a17268",
+              "name": "post_data",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e441aefd-1c8c-4e2b-adea-851ff27232f4",
+              "name": "comment_text",
+              "value": "={{ $('Download').item.json.First_Comment }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        -2096
+      ],
+      "id": "bde5fbac-a150-41e2-8d99-bcb333a5308b",
+      "name": "Image Adding Comment"
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.filter(item => {\n  const status = item.json.STATUS;\n  return status === 'Pending';   // ✅ Only check status\n}).map(item => {\n  item.json.originalRowIndex = item.originalIndex + 1;\n\n\n  return item;\n});\n"
+      },
+      "name": "Filter Posts Status",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -1344,
+        -2192
+      ],
+      "id": "35831609-b79f-44a3-a956-afec4d693339",
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "791837494007866",
+        "edge": "photos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "=data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "caption",
+                "value": "={{ $json.CAPTIONS }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -2000
+      ],
+      "id": "cc88786e-132a-481a-8ae9-524626993a25",
+      "name": "Image Uploading & Captioning",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1JqKQiKP3QmSL4LB",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.id }}",
+        "edge": "comments",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $json.comment_text }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -2288
+      ],
+      "id": "3e933f97-caea-4f27-9aec-961240501c86",
+      "name": "Video Comment Posting",
+      "alwaysOutputData": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1JqKQiKP3QmSL4LB",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk",
+          "mode": "list",
+          "cachedResultName": "Socials On Autopilot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1211694447,
+          "mode": "list",
+          "cachedResultName": "Copy of Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk/edit#gid=1211694447"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Download').item.json.ID }}",
+            "STATUS": "Posted"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "VIDEO_URL",
+              "displayName": "VIDEO_URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_Time",
+              "displayName": "Post_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First_Comment",
+              "displayName": "First_Comment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CAPTIONS",
+              "displayName": "CAPTIONS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "STATUS",
+              "displayName": "STATUS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -2096
+      ],
+      "id": "c99ed9f5-f2e5-4b26-ba08-cf8294a547bd",
+      "name": "Status Update for Image",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JTEMhO9UR0gfgRXM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "024ed788-a778-4e34-860e-47cb38047231",
+              "name": "post_link",
+              "value": "=https://www.facebook.com/{{ $json.post_id || $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        -1904
+      ],
+      "id": "cae66e8b-3f5e-4b71-a231-9727780b8765",
+      "name": "Post Link(Image)"
+    },
+    {
+      "parameters": {
+        "chatId": "5694645069",
+        "text": "=Image Posted ✅\n[Open Post]({{$json.post_link}})\n",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -1904
+      ],
+      "id": "67e16745-28d5-48c8-ae08-0e14c8605db7",
+      "name": "Confirming the image posting",
+      "webhookId": "a67779bf-d279-4dea-8c45-605a06919674",
+      "credentials": {
+        "telegramApi": {
+          "id": "Kj62BsvUIW75Av82",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2016,
+        -2000
+      ],
+      "id": "6d08a1a3-8d17-47ac-9c83-1a66d832b77f",
+      "name": "Telegram Trigger",
+      "webhookId": "87d9e3fe-b2ac-4a44-addb-fe71b212e0b4",
+      "credentials": {
+        "telegramApi": {
+          "id": "Kj62BsvUIW75Av82",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6920eed-2a10-4d95-93f6-a4f89da6b3fe",
+              "leftValue": "=={{ $binary.data.mimeType }}\n",
+              "rightValue": "image",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -672,
+        -2480
+      ],
+      "id": "360bd016-b548-4cb5-898d-254a30d210ae",
+      "name": "Post Type Filter"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.Thumnail.split('/')[5] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -896,
+        -1856
+      ],
+      "id": "2dd30818-3cca-4294-8dfd-24f218bc817f",
+      "name": "Download Thumbnail",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "2pfvcp19BFuCywdZ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  if (item.binary && item.binary.data) {\n    // Check if the item has binary data\n    item.binary.thumb = item.binary.data;\n    delete item.binary.data;\n  }\n  return item;\n});\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        -1856
+      ],
+      "id": "f045f561-85b5-424e-af8f-791e4d14b82d",
+      "name": "Rename to Thumb"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk",
+          "mode": "list",
+          "cachedResultName": "Socials On Autopilot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1211694447,
+          "mode": "list",
+          "cachedResultName": "Copy of Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzqAXIX2fCxBxosbB3mt5G6ruWcKO_mwa8wmEYGT5Qk/edit#gid=1211694447"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Download').item.json.ID }}",
+            "STATUS": "Posted"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "VIDEO_URL",
+              "displayName": "VIDEO_URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_Time",
+              "displayName": "Post_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First_Comment",
+              "displayName": "First_Comment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CAPTIONS",
+              "displayName": "CAPTIONS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "STATUS",
+              "displayName": "STATUS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        -2288
+      ],
+      "id": "d54b5aae-1f01-49e4-95b3-59021056f02e",
+      "name": "Status Update for Videos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JTEMhO9UR0gfgRXM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.id }}",
+        "edge": "thumbnails",
+        "sendBinaryData": true,
+        "binaryPropertyName": "thumb",
+        "options": {}
+      },
+      "name": "Set Video Thumbnail",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -2288
+      ],
+      "id": "390618a8-cbb3-4d0e-9ca0-dbb4e065d1fc",
+      "notesInFlow": true,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1JqKQiKP3QmSL4LB",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "024ed788-a778-4e34-860e-47cb38047231",
+              "name": "post_link",
+              "value": "=https://www.facebook.com/{{ $json.post_id || $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        -2480
+      ],
+      "id": "ca1cbf20-bd18-4a76-87a1-8baae1407c09",
+      "name": "Post link(Video)"
+    },
+    {
+      "parameters": {
+        "chatId": "5694645069",
+        "text": "=Video Posted 🎥\n[Open Post]({{$json.post_link}})",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -2480
+      ],
+      "id": "8dd5a52f-5d28-4068-a716-3a352c4fc73e",
+      "name": "Confirming the video posting",
+      "webhookId": "45f59880-3e00-44a6-b955-2854aea42b39",
+      "credentials": {
+        "telegramApi": {
+          "id": "Kj62BsvUIW75Av82",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "791837494007866",
+        "edge": "videos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "description",
+                "value": "={{ $json.CAPTIONS }}"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Video Uploading & Captioning1",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -2576
+      ],
+      "id": "4048f5a2-ceec-4ff0-8881-c66cfa8aa7f3",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1JqKQiKP3QmSL4LB",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "mergeByIndex"
+      },
+      "name": "Merge Video + Thumb",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -2480
+      ],
+      "id": "a1c56b3a-dd91-4c33-be8a-fce84d20cc65"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fb2c3df3-3f35-4943-a363-b29678d356df",
+              "leftValue": "={{ $json.Thumnail }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        -1856
+      ],
+      "id": "fdb018f7-fe2f-4770-a14d-55c3377e3a8e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $binary.thumb.toString() }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "472caf29-f663-4d88-b6ba-2bb484a720fa"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -448,
+        -1808
+      ],
+      "id": "646e45c2-7674-4d9d-abdb-fbf379669822",
+      "name": "thumb"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "9d8ad343-dde9-4154-9895-c292aff130d1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        -2672
+      ],
+      "id": "bcf1a336-767a-44e3-987b-50f825724208",
+      "name": "Post id"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  return {\n    json: {\n      id: item.json.id   // This must be a valid post ID\n    },\n    binary: {\n      thumb: item.binary?.thumb\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -2288
+      ],
+      "id": "b1f0a5a8-9354-4cb9-bfc0-b473e9fcf6d6",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph-video.facebook.com/v23.0/{{$json[\"id\"]}}/thumbnails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAn7ZBfIBvIkBPHLdxTxVRcZCDcfiayPSg5VBdFwqll7jtji4KgZADlVmkQg8MICM94DvFKRpwGbepcg2XSoX5g64sNnY24EGpLvgvxXJUrrdltLDjYxOHZBUX2uTR7d3LZCPiEXJdOomZALg0YMKj8cf4vnlogwR7OoVFy4gkVMc4DU4N5dMeKrNm7fFuImzVIwSe"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "thumb",
+              "value": "={{$binary.thumb}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        -2288
+      ],
+      "id": "b4b4f796-6e7b-40e7-a36d-95ead48aa5e6",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Post Searching",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Comment Posting": {
+      "main": [
+        [
+          {
+            "node": "Status Update for Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Searching": {
+      "main": [
+        [
+          {
+            "node": "Filter Posts Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Download": {
+      "main": [
+        [
+          {
+            "node": "Post Type Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Adding Comment": {
+      "main": [
+        [
+          {
+            "node": "Video Comment Posting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Adding Comment": {
+      "main": [
+        [
+          {
+            "node": "Image Comment Posting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Posts Status": {
+      "main": [
+        [
+          {
+            "node": "Download",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Uploading & Captioning": {
+      "main": [
+        [
+          {
+            "node": "Post Link(Image)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Image Adding Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Comment Posting": {
+      "main": [
+        [
+          {
+            "node": "Status Update for Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Update for Image": {
+      "main": [
+        []
+      ]
+    },
+    "Post Link(Image)": {
+      "main": [
+        [
+          {
+            "node": "Confirming the image posting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Type Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge Video + Thumb",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Image Uploading & Captioning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Rename to Thumb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename to Thumb": {
+      "main": [
+        [
+          {
+            "node": "Merge Video + Thumb",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "thumb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Video Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Video Adding Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post link(Video)": {
+      "main": [
+        [
+          {
+            "node": "Confirming the video posting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Uploading & Captioning1": {
+      "main": [
+        [
+          {
+            "node": "Post link(Video)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Video + Thumb": {
+      "main": [
+        [
+          {
+            "node": "Video Uploading & Captioning1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Download Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "thumb": {
+      "main": [
+        []
+      ]
+    },
+    "Post id": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Set Video Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "31f7b169-f60c-4bc1-82ca-55274c5c09ad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f1088a7c4a219b45c8ad94410cb8d7cf4822a096c6addf56d37e26705aaf5f9a"
+  },
+  "id": "1BRX2l4Jy0eaJGVq",
+  "tags": []
+}
